@@ -7,10 +7,15 @@ It was built as part of our Network Programming Lab (IT328) project to practice 
 
 ### Features
 ✅ Multi-Client Support — multiple users can connect to the server at the same time
+
 ✅ Registration System — users register with a username and password (no hashing for simplicity)
+
 ✅ Thread Safety — synchronized sections prevent duplicate usernames
-✅ Console Interaction — all user interaction happens through the command line
+
+✅ Console Interaction — all user interaction happens through the command line //so far, not yet added GUI
+
 ✅ Extensible Structure — future versions will include sport selection and time slot reservations
+
 
 ### Contributors
 - Fatimah AlHebshi
