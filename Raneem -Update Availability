@@ -1,0 +1,210 @@
+mport java.util.ArrayList;
+import java.util.Scanner;
+
+public class Availability {
+  
+
+
+    static ArrayList<String> bookedDate = new ArrayList<>();
+    static ArrayList<String> bookedSport = new ArrayList<>();
+    static ArrayList<String> bookedHall  = new ArrayList<>();
+    static ArrayList<String> bookedTime  = new ArrayList<>();
+    static String[] Halls = {"Hall A", "Hall B", "Hall C"};
+    static String[] Times = {
+        "08:00-09:00",
+        "09:00-10:00",
+        "10:00-11:00",
+        "17:00-18:00",
+        "18:00-19:00",
+        "19:00-20:00"};
+    
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+
+        System.out.println("=== Sports Hall Reservation System ===");
+
+        System.out.print("Enter today year: ");
+        int todayY = in.nextInt();
+        System.out.print("Enter today month: ");
+        int todayM = in.nextInt();
+        System.out.print("Enter today day: ");
+        int todayD = in.nextInt();
+        String today = todayY + "-" + two(todayM) + "-" + two(todayD);
+
+        while (true) {
+            System.out.println("\n1) Add new reservation");
+            System.out.println("2) Show all reservations");
+            System.out.println("3) Exit");
+            System.out.print("Choose: ");
+            int choice = in.nextInt();
+
+            if (choice == 1) addReservation(in, today);
+            else if (choice == 2) showAll();
+            else if (choice == 3) {
+                System.out.println("Goodbye!");
+                break;
+            } else {
+                System.out.println("Invalid choice.");
+            }
+        }
+
+        in.close();
+    }
+
+    static void addReservation(Scanner in, String today) {
+        System.out.println("\nEnter booking date:");
+        System.out.print("Enter year: ");
+        int y = in.nextInt();
+        System.out.print("Enter month: ");
+        int m = in.nextInt();
+        System.out.print("Enter day: ");
+        int d = in.nextInt();
+        String date = y + "-" + two(m) + "-" + two(d);
+
+        if (date.compareTo(today) < 0) {
+            System.out.println("You cannot book in the past.");
+            return;
+        }
+
+        System.out.println("\nChoose sport:");
+        System.out.println("1) Padel");
+        System.out.println("2) Tennis");
+        System.out.println("3) Football");
+        int s = in.nextInt();
+        String sport = "";
+        if (s == 1) sport = "Padel";
+        else if (s == 2) sport = "Tennis";
+        else if (s == 3) sport = "Football";
+        else {
+            System.out.println("Invalid sport.");
+            return;
+        }
+        ArrayList<String> availableHalls = AvailableHalls(date, sport);
+        if (availableHalls.isEmpty()) {
+            System.out.print("\nNo Available Halls for this sport and date.");
+            return;
+        }
+        System.out.println("\nChoose hall:");
+        for (int i= 0; i< availableHalls.size(); i++){
+          System.out.println((i+1) + ")" + availableHalls.get(i));
+        }
+        int h = in.nextInt();
+        if (h <1 || h >availableHalls.size()){
+            System.out.println("Invalid hall.");
+            return;
+        }
+        String hall = availableHalls.get(h -1);
+          
+    
+        ArrayList<String> availableTimes = AvailableTimes(date, sport, hall);
+        if (availableTimes.isEmpty()) {
+            System.out.print("\nNo Available Time for this hall");
+            return;
+        }
+        System.out.println("\nChoose time slot:");
+        for (int i= 0; i< availableTimes.size(); i++){
+          System.out.println((i+1) + ")" + availableTimes.get(i));
+        }
+        int t = in.nextInt();
+        if (t <1 || t >availableTimes.size()){
+            System.out.println("Invalid Time.");
+            return;
+        }
+        String time = availableTimes.get(t -1);
+        
+        
+
+        // check if already booked
+        for (int i = 0; i < bookedDate.size(); i++) {
+            if (bookedDate.get(i).equals(date)
+                    && bookedSport.get(i).equals(sport)
+                    && bookedHall.get(i).equals(hall)
+                    && bookedTime.get(i).equals(time)) {
+                System.out.println("This time slot is already booked.");
+                return;
+            }
+        }
+
+        // add new reservation
+        bookedDate.add(date);
+        bookedSport.add(sport);
+        bookedHall.add(hall);
+        bookedTime.add(time);
+
+        System.out.println("\nReservation added successfully.");
+        System.out.println("Sport: " + sport);
+        System.out.println("Hall: " + hall);
+        System.out.println("Date: " + date);
+        System.out.println("Time: " + time);
+    }
+
+    static void showAll() {
+        if (bookedDate.isEmpty()) {
+            System.out.println("No reservations yet.");
+            return;
+        }
+        System.out.println("\n=== All Reservations ===");
+        for (int i = 0; i < bookedDate.size(); i++) {
+            System.out.println((i + 1) + ") " + bookedSport.get(i) + " | "
+                    + bookedHall.get(i) + " | " + bookedDate.get(i)
+                    + " | " + bookedTime.get(i));
+        }
+    }
+
+    static String two(int n) {
+        String result;
+        if (n < 10) {
+            result = "0" + n;
+        } else {
+            result = "" + n;
+        }
+        return result;
+    }
+    static ArrayList<String> AvailableHalls(String date, String sport){
+        int hallAcount=0, hallBcount = 0, hallCcount= 0;
+        
+        for (int i = 0; i< bookedDate.size(); i++){ //Number of each Hall booked in that Date
+            if(bookedDate.get(i).equals(date) && bookedSport.get(i).equals(sport)){
+                String h= bookedHall.get(i);
+                if (h.equals("Hall A"))
+                    hallAcount++;
+                else if (h.equals("Hall B"))
+                    hallBcount++;
+                else if (h.equals("Hall C"))
+                    hallCcount++;
+            }
+        }
+        ArrayList<String> Halls = new ArrayList<>();
+        int totalTimes = Times.length;
+        if (hallAcount < totalTimes) // if there is still available time in that date
+            Halls.add("Hall A");
+        if (hallBcount < totalTimes)
+            Halls.add("Hall B");
+        if (hallCcount < totalTimes)
+            Halls.add("Hall C");
+        return Halls;      
+}
+    
+static ArrayList<String> AvailableTimes (String date, String sport,String hall){
+    ArrayList<String> TimeBooked = new ArrayList<>();
+    for (int i= 0; i < bookedDate.size(); i++){
+        if (bookedDate.get(i).equals(date)
+                && bookedSport.get(i).equals(sport)
+                && bookedHall.get(i).equals(hall)){
+            TimeBooked.add(bookedTime.get(i));  
+        }
+    }
+  
+    ArrayList<String> TimesAvailable = new ArrayList<>();
+    for (int i= 0; i< Times.length; i++){
+        String time = Times[i];
+        if (!TimeBooked.contains(time))
+                TimesAvailable.add(time);
+        
+    }
+    return TimesAvailable;
+}
+}
+    
+
