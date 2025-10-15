@@ -1,0 +1,169 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
+ */
+package network;
+
+
+/**
+ *
+ * @author Dalia
+ */
+
+
+  import java.util.ArrayList;
+import java.util.Scanner;
+
+public class AddNewReservation {
+
+    static ArrayList<String> bookedDate = new ArrayList<>();
+    static ArrayList<String> bookedSport = new ArrayList<>();
+    static ArrayList<String> bookedHall  = new ArrayList<>();
+    static ArrayList<String> bookedTime  = new ArrayList<>();
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+
+        System.out.println("=== Sports Hall Reservation System ===");
+
+        System.out.print("Enter today year: ");
+        int todayY = in.nextInt();
+        System.out.print("Enter today month: ");
+        int todayM = in.nextInt();
+        System.out.print("Enter today day: ");
+        int todayD = in.nextInt();
+        String today = todayY + "-" + two(todayM) + "-" + two(todayD);
+
+        while (true) {
+            System.out.println("\n1) Add new reservation");
+            System.out.println("2) Show all reservations");
+            System.out.println("3) Exit");
+            System.out.print("Choose: ");
+            int choice = in.nextInt();
+
+            if (choice == 1) addReservation(in, today);
+            else if (choice == 2) showAll();
+            else if (choice == 3) {
+                System.out.println("Goodbye!");
+                break;
+            } else {
+                System.out.println("Invalid choice.");
+            }
+        }
+
+        in.close();
+    }
+
+    static void addReservation(Scanner in, String today) {
+        System.out.println("\nEnter booking date:");
+        System.out.print("Enter year: ");
+        int y = in.nextInt();
+        System.out.print("Enter month: ");
+        int m = in.nextInt();
+        System.out.print("Enter day: ");
+        int d = in.nextInt();
+        String date = y + "-" + two(m) + "-" + two(d);
+
+        if (date.compareTo(today) < 0) {
+            System.out.println("You cannot book in the past.");
+            return;
+        }
+
+        System.out.println("\nChoose sport:");
+        System.out.println("1) Padel");
+        System.out.println("2) Tennis");
+        System.out.println("3) Football");
+        int s = in.nextInt();
+        String sport = "";
+        if (s == 1) sport = "Padel";
+        else if (s == 2) sport = "Tennis";
+        else if (s == 3) sport = "Football";
+        else {
+            System.out.println("Invalid sport.");
+            return;
+        }
+
+        System.out.println("\nChoose hall:");
+        System.out.println("1) Hall A");
+        System.out.println("2) Hall B");
+        System.out.println("3) Hall C");
+        int h = in.nextInt();
+        String hall = "";
+        if (h == 1) hall = "Hall A";
+        else if (h == 2) hall = "Hall B";
+        else if (h == 3) hall = "Hall C";
+        else {
+            System.out.println("Invalid hall.");
+            return;
+        }
+
+        System.out.println("\nChoose time slot:");
+        System.out.println("1) 08:00 - 09:00");
+        System.out.println("2) 09:00 - 10:00");
+        System.out.println("3) 10:00 - 11:00");
+        System.out.println("4) 17:00 - 18:00");
+        System.out.println("5) 18:00 - 19:00");
+        System.out.println("6) 19:00 - 20:00");
+        int t = in.nextInt();
+        String time = "";
+        if (t == 1) time = "08:00 - 09:00";
+        else if (t == 2) time = "09:00 - 10:00";
+        else if (t == 3) time = "10:00 - 11:00";
+        else if (t == 4) time = "17:00 - 18:00";
+        else if (t == 5) time = "18:00 - 19:00";
+        else if (t == 6) time = "19:00 - 20:00";
+        else {
+            System.out.println("Invalid time slot.");
+            return;
+        }
+
+        // check if already booked
+        for (int i = 0; i < bookedDate.size(); i++) {
+            if (bookedDate.get(i).equals(date)
+                    && bookedSport.get(i).equals(sport)
+                    && bookedHall.get(i).equals(hall)
+                    && bookedTime.get(i).equals(time)) {
+                System.out.println("This time slot is already booked.");
+                return;
+            }
+        }
+
+        // add new reservation
+        bookedDate.add(date);
+        bookedSport.add(sport);
+        bookedHall.add(hall);
+        bookedTime.add(time);
+
+        System.out.println("\nReservation added successfully.");
+        System.out.println("Sport: " + sport);
+        System.out.println("Hall: " + hall);
+        System.out.println("Date: " + date);
+        System.out.println("Time: " + time);
+    }
+
+    static void showAll() {
+        if (bookedDate.isEmpty()) {
+            System.out.println("No reservations yet.");
+            return;
+        }
+        System.out.println("\n=== All Reservations ===");
+        for (int i = 0; i < bookedDate.size(); i++) {
+            System.out.println((i + 1) + ") " + bookedSport.get(i) + " | "
+                    + bookedHall.get(i) + " | " + bookedDate.get(i)
+                    + " | " + bookedTime.get(i));
+        }
+    }
+
+    static String two(int n) {
+        String result;
+        if (n < 10) {
+            result = "0" + n;
+        } else {
+            result = "" + n;
+        }
+        return result;
+    }
+}
+
+    
+
