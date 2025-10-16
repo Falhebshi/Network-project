@@ -1,0 +1,172 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class AddNewReservations {
+
+    static final String[] DATES = {
+        "", 
+        "2025-09-06",
+        "2025-09-07",
+        "2025-09-08",
+        "2025-09-09",
+        "2025-09-10",
+        "2025-09-11",
+        "2025-09-12"
+    };
+
+    static final String[] SPORTS = { "", "Padel", "Tennis", "Football" };
+    static final String[] FIELDS = { "", "Field 1", "Field 2", "Field 3", "Field 4", "Field 5" };
+    static final String[] TIMES  = {
+        "", 
+        "08:00 - 09:00",
+        "09:00 - 10:00",
+        "10:00 - 11:00",
+        "17:00 - 18:00",
+        "18:00 - 19:00",
+        "19:00 - 20:00"
+    };
+
+    static ArrayList<String> bookedDate  = new ArrayList<>();
+    static ArrayList<String> bookedSport = new ArrayList<>();
+    static ArrayList<String> bookedField = new ArrayList<>();
+    static ArrayList<String> bookedTime  = new ArrayList<>();
+
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n1) Add new reservation");
+            System.out.println("2) Show all reservations");
+            System.out.println("3) Exit");
+            System.out.print("Choose: ");
+            int choice = in.nextInt();
+
+            if (choice == 1) {
+                addreservation(in);
+            } else if (choice == 2) {
+                showall();
+            } else if (choice == 3) {
+                System.out.println("Goodbye!");
+                break;
+            } else {
+                System.out.println("Invalid choice.");
+            }
+        }
+
+        in.close();
+    }
+
+    static void addreservation(Scanner in) {
+        System.out.println("\nChoose a date:");
+        for (int i = 1; i < DATES.length; i++) {
+            System.out.println(i + ") " + formatDate(DATES[i]));
+        }
+        System.out.print("Enter number: ");
+        int d = in.nextInt();
+        if (d < 1 || d >= DATES.length) {
+            System.out.println("Invalid date.");
+            return;
+        }
+        String date = DATES[d];
+
+        System.out.println("\nChoose a sport:");
+        for (int i = 1; i < SPORTS.length; i++) {
+            System.out.println(i + ") " + SPORTS[i]);
+        }
+        System.out.print("Enter number: ");
+        int s = in.nextInt();
+        if (s < 1 || s >= SPORTS.length) {
+            System.out.println("Invalid sport.");
+            return;
+        }
+        String sport = SPORTS[s];
+
+        System.out.println("\nChoose a time slot:");
+        for (int i = 1; i < TIMES.length; i++) {
+            System.out.println(i + ") " + TIMES[i]);
+        }
+        System.out.print("Enter number: ");
+        int t = in.nextInt();
+        if (t < 1 || t >= TIMES.length) {
+            System.out.println("Invalid time slot.");
+            return;
+        }
+        String time = TIMES[t];
+
+        ArrayList<String> freeFields = new ArrayList<>();
+        for (int i = 1; i < FIELDS.length; i++) {
+            String field = FIELDS[i];
+            if (!isbooked(date, sport, field, time)) {
+                freeFields.add(field);
+            }
+        }
+
+        if (freeFields.isEmpty()) {
+            System.out.println("No available fields for this date and time.");
+            return;
+        }
+
+        System.out.println("\nAvailable fields:");
+        for (int i = 0; i < freeFields.size(); i++) {
+            System.out.println((i + 1) + ") " + freeFields.get(i));
+        }
+        System.out.print("Enter number: ");
+        int f = in.nextInt();
+        if (f < 1 || f > freeFields.size()) {
+            System.out.println("Invalid field.");
+            return;
+        }
+        String field = freeFields.get(f - 1);
+
+        bookedDate.add(date);
+        bookedSport.add(sport);
+        bookedField.add(field);
+        bookedTime.add(time);
+
+        System.out.println("\nReservation confirmed:");
+        System.out.println("Date  : " + date + " (" + formatDate(date) + ")");
+        System.out.println("Sport : " + sport);
+        System.out.println("Field : " + field);
+System.out.println("Time  : " + time);
+    }
+
+    static boolean isbooked(String date, String sport, String field, String time) {
+        for (int i = 0; i < bookedDate.size(); i++) {
+            if (bookedDate.get(i).equals(date)
+                && bookedSport.get(i).equals(sport)
+                && bookedField.get(i).equals(field)
+                && bookedTime.get(i).equals(time)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void showall() {
+        if (bookedDate.isEmpty()) {
+            System.out.println("No reservations yet.");
+            return;
+        }
+
+        System.out.println("\n=== All Reservations ===");
+        for (int i = 0; i < bookedDate.size(); i++) {
+            System.out.println((i + 1) + ") " + bookedDate.get(i)
+                + " | " + bookedSport.get(i)
+                + " | " + bookedField.get(i)
+                + " | " + bookedTime.get(i));
+        }
+    }
+
+    static String formatDate(String dateValue) {
+        String year = dateValue.substring(0, 4);
+        int month = Integer.parseInt(dateValue.substring(5, 7));
+        int day = Integer.parseInt(dateValue.substring(8, 10));
+        return day + " " + monthname(month) + " " + year;
+    }
+
+    static String monthname(int m) {
+        String[] names = {"", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                          "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"};
+        return names[m];
+    }
+}
