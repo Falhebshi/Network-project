@@ -1,36 +1,38 @@
-mport java.util.ArrayList;
+import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Availability {
-  
+public class AddNewReservations {
 
+    static final String[] DATES = {
+        "", 
+        "2025-09-06",
+        "2025-09-07",
+        "2025-09-08",
+        "2025-09-09",
+        "2025-09-10",
+        "2025-09-11",
+        "2025-09-12"
+    };
 
-    static ArrayList<String> bookedDate = new ArrayList<>();
+    static final String[] SPORTS = { "", "Padel", "Tennis", "Football" };
+    static final String[] FIELDS = { "", "Field 1", "Field 2", "Field 3", "Field 4", "Field 5" };
+    static final String[] TIMES  = {
+        "", 
+        "08:00 - 09:00",
+        "09:00 - 10:00",
+        "10:00 - 11:00",
+        "17:00 - 18:00",
+        "18:00 - 19:00",
+        "19:00 - 20:00"
+    };
+
+    static ArrayList<String> bookedDate  = new ArrayList<>();
     static ArrayList<String> bookedSport = new ArrayList<>();
-    static ArrayList<String> bookedHall  = new ArrayList<>();
+    static ArrayList<String> bookedField = new ArrayList<>();
     static ArrayList<String> bookedTime  = new ArrayList<>();
-    static String[] Halls = {"Hall A", "Hall B", "Hall C"};
-    static String[] Times = {
-        "08:00-09:00",
-        "09:00-10:00",
-        "10:00-11:00",
-        "17:00-18:00",
-        "18:00-19:00",
-        "19:00-20:00"};
-    
 
     public static void main(String[] args) {
         Scanner in = new Scanner(System.in);
-
-        System.out.println("=== Sports Hall Reservation System ===");
-
-        System.out.print("Enter today year: ");
-        int todayY = in.nextInt();
-        System.out.print("Enter today month: ");
-        int todayM = in.nextInt();
-        System.out.print("Enter today day: ");
-        int todayD = in.nextInt();
-        String today = todayY + "-" + two(todayM) + "-" + two(todayD);
 
         while (true) {
             System.out.println("\n1) Add new reservation");
@@ -39,9 +41,11 @@ public class Availability {
             System.out.print("Choose: ");
             int choice = in.nextInt();
 
-            if (choice == 1) addReservation(in, today);
-            else if (choice == 2) showAll();
-            else if (choice == 3) {
+            if (choice == 1) {
+                addreservation(in);
+            } else if (choice == 2) {
+                showall();
+            } else if (choice == 3) {
                 System.out.println("Goodbye!");
                 break;
             } else {
@@ -52,159 +56,194 @@ public class Availability {
         in.close();
     }
 
-    static void addReservation(Scanner in, String today) {
-        System.out.println("\nEnter booking date:");
-        System.out.print("Enter year: ");
-        int y = in.nextInt();
-        System.out.print("Enter month: ");
-        int m = in.nextInt();
-        System.out.print("Enter day: ");
+    static void addreservation(Scanner in) {
+        System.out.println("\nChoose a date:");
+        ArrayList<String> availableDates = AvailableDates();
+        if (availableDates.isEmpty()){
+            System.out.println("No available dates at all.");
+    return;}
+        for (int i = 0; i < availableDates.size(); i++) {
+            System.out.println((i+1) + ") " + formatDate(availableDates.get(i)));
+        }
+        System.out.print("Enter number: ");
         int d = in.nextInt();
-        String date = y + "-" + two(m) + "-" + two(d);
-
-        if (date.compareTo(today) < 0) {
-            System.out.println("You cannot book in the past.");
+        if (d < 1 || d > availableDates.size()) {
+            System.out.println("Invalid date.");
             return;
         }
+        String date = availableDates.get(d - 1);
 
-        System.out.println("\nChoose sport:");
-        System.out.println("1) Padel");
-        System.out.println("2) Tennis");
-        System.out.println("3) Football");
+        System.out.println("\nChoose a sport:");
+        ArrayList<String> availableSports = availableSports(date);
+        if (availableSports.isEmpty()){
+            System.out.println("No available sports at this date.");
+    return;}
+        for (int i = 0; i < availableSports.size(); i++) {
+            System.out.println((i+1) + ") " + availableSports.get(i));
+        }
+        System.out.print("Enter number: ");
         int s = in.nextInt();
-        String sport = "";
-        if (s == 1) sport = "Padel";
-        else if (s == 2) sport = "Tennis";
-        else if (s == 3) sport = "Football";
-        else {
+        if (s < 1 || s > availableSports.size()) {
             System.out.println("Invalid sport.");
             return;
         }
-        ArrayList<String> availableHalls = AvailableHalls(date, sport);
-        if (availableHalls.isEmpty()) {
-            System.out.print("\nNo Available Halls for this sport and date.");
-            return;
-        }
-        System.out.println("\nChoose hall:");
-        for (int i= 0; i< availableHalls.size(); i++){
-          System.out.println((i+1) + ")" + availableHalls.get(i));
-        }
-        int h = in.nextInt();
-        if (h <1 || h >availableHalls.size()){
-            System.out.println("Invalid hall.");
-            return;
-        }
-        String hall = availableHalls.get(h -1);
-          
-    
-        ArrayList<String> availableTimes = AvailableTimes(date, sport, hall);
-        if (availableTimes.isEmpty()) {
-            System.out.print("\nNo Available Time for this hall");
-            return;
-        }
-        System.out.println("\nChoose time slot:");
-        for (int i= 0; i< availableTimes.size(); i++){
-          System.out.println((i+1) + ")" + availableTimes.get(i));
-        }
-        int t = in.nextInt();
-        if (t <1 || t >availableTimes.size()){
-            System.out.println("Invalid Time.");
-            return;
-        }
-        String time = availableTimes.get(t -1);
-        
-        
+        String sport = availableSports.get(s - 1);
 
-        // check if already booked
-        for (int i = 0; i < bookedDate.size(); i++) {
-            if (bookedDate.get(i).equals(date)
-                    && bookedSport.get(i).equals(sport)
-                    && bookedHall.get(i).equals(hall)
-                    && bookedTime.get(i).equals(time)) {
-                System.out.println("This time slot is already booked.");
-                return;
+        System.out.println("\nChoose a time slot:");
+        ArrayList<String> availableTimes = availableTimes(date ,sport);
+        if (availableTimes.isEmpty()){
+            System.out.println("No available time slots for this date and sport.");
+    return;}
+        for (int i = 0; i < availableTimes.size(); i++) {
+            System.out.println((i+1) + ") " + availableTimes.get(i));
+        }
+        System.out.print("Enter number: ");
+        int t = in.nextInt();
+        if (t < 1 || t > availableTimes.size()) {
+            System.out.println("Invalid time slot.");
+            return;
+        }
+        String time = availableTimes.get(t - 1);
+        
+        ArrayList<String> freeFields = new ArrayList<>();
+        for (int i = 1; i < FIELDS.length; i++) {
+            String field = FIELDS[i];
+            if (!isbooked(date, sport, field, time)) {
+                freeFields.add(field);
             }
         }
 
-        // add new reservation
+        if (freeFields.isEmpty()) {
+            System.out.println("No available fields for this date and time.");
+            return;
+        }
+
+        System.out.println("\nAvailable fields:");
+        for (int i = 0; i < freeFields.size(); i++) {
+            System.out.println((i + 1) + ") " + freeFields.get(i));
+        }
+        System.out.print("Enter number: ");
+        int f = in.nextInt();
+        if (f < 1 || f > freeFields.size()) {
+            System.out.println("Invalid field.");
+            return;
+        }
+        String field = freeFields.get(f - 1);
+
         bookedDate.add(date);
         bookedSport.add(sport);
-        bookedHall.add(hall);
+        bookedField.add(field);
         bookedTime.add(time);
 
-        System.out.println("\nReservation added successfully.");
-        System.out.println("Sport: " + sport);
-        System.out.println("Hall: " + hall);
-        System.out.println("Date: " + date);
-        System.out.println("Time: " + time);
+        System.out.println("\nReservation confirmed:");
+        System.out.println("Date  : " + date + " (" + formatDate(date) + ")");
+        System.out.println("Sport : " + sport);
+        System.out.println("Field : " + field);
+System.out.println("Time  : " + time);
     }
 
-    static void showAll() {
+    static boolean isbooked(String date, String sport, String field, String time) {
+        for (int i = 0; i < bookedDate.size(); i++) {
+            if (bookedDate.get(i).equals(date)
+                && bookedSport.get(i).equals(sport)
+                && bookedField.get(i).equals(field)
+                && bookedTime.get(i).equals(time)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static void showall() {
         if (bookedDate.isEmpty()) {
             System.out.println("No reservations yet.");
             return;
         }
+
         System.out.println("\n=== All Reservations ===");
         for (int i = 0; i < bookedDate.size(); i++) {
-            System.out.println((i + 1) + ") " + bookedSport.get(i) + " | "
-                    + bookedHall.get(i) + " | " + bookedDate.get(i)
-                    + " | " + bookedTime.get(i));
+            System.out.println((i + 1) + ") " + bookedDate.get(i)
+                + " | " + bookedSport.get(i)
+                + " | " + bookedField.get(i)
+                + " | " + bookedTime.get(i));
         }
     }
 
-    static String two(int n) {
-        String result;
-        if (n < 10) {
-            result = "0" + n;
-        } else {
-            result = "" + n;
-        }
-        return result;
+    static String formatDate(String dateValue) {
+        String year = dateValue.substring(0, 4);
+        int month = Integer.parseInt(dateValue.substring(5, 7));
+        int day = Integer.parseInt(dateValue.substring(8, 10));
+        return day + " " + monthname(month) + " " + year;
     }
-    static ArrayList<String> AvailableHalls(String date, String sport){
-        int hallAcount=0, hallBcount = 0, hallCcount= 0;
+
+    static String monthname(int m) {
+        String[] names = {"", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                          "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"};
+        return names[m];
+    }
+    static ArrayList<String> AvailableDates (){
+    ArrayList<String> Dates = new ArrayList<>();
+    for (int i= 1; i <DATES.length; i++){
+        String date = DATES[i];
+        if (isDateAvailable(date))
+            Dates.add(date);
+        }
+    return Dates;
+    }
+    static boolean isDateAvailable(String date){
+        for (int i = 1; i< SPORTS.length; i++){
+            String sport = SPORTS[i];
+            for (int j = 1; j< TIMES.length; j++) {
+                String time = TIMES[j];
+                if (!timeNotAvailable(date, sport, time))
+                    return true;
+            }           
+}
+        return false;  
+}
+    static ArrayList<String> availableSports (String date) {
+        ArrayList<String> sports = new ArrayList<>();
+        for (int i = 1; i < SPORTS.length; i++) {
+        String sport = SPORTS[i];
+        if (isSportAvailable(date, sport)) {
+            sports.add(sport);
+        }
+    }
+    return sports;
+}
+    
+    static boolean isSportAvailable(String date,String sport){
+        for (int i = 1; i< TIMES.length; i++){
+            String time = TIMES[i];
+                if (!timeNotAvailable(date, sport, time))
+                    return true;
+            }           
+        return false;  
+}
+    
+    static ArrayList<String> availableTimes(String date, String sport) {
+    ArrayList<String> times = new ArrayList<>();
+    for (int i = 1; i < TIMES.length; i++) {
+        String time = TIMES[i];
+        if (!timeNotAvailable(date, sport, time)) {
+            times.add(time);
+        }
+    }
+    return times;
+}
+    static boolean timeNotAvailable(String date, String sport, String time) {
+        int fieldsCount = FIELDS.length -1;
+        int bookedFields = 0;
         
-        for (int i = 0; i< bookedDate.size(); i++){ //Number of each Hall booked in that Date
-            if(bookedDate.get(i).equals(date) && bookedSport.get(i).equals(sport)){
-                String h= bookedHall.get(i);
-                if (h.equals("Hall A"))
-                    hallAcount++;
-                else if (h.equals("Hall B"))
-                    hallBcount++;
-                else if (h.equals("Hall C"))
-                    hallCcount++;
+        for (int i = 0; i < bookedDate.size(); i++) {
+            if (bookedDate.get(i).equals(date)
+                && bookedSport.get(i).equals(sport)
+                && bookedTime.get(i).equals(time)) {
+                bookedFields++;
             }
         }
-        ArrayList<String> Halls = new ArrayList<>();
-        int totalTimes = Times.length;
-        if (hallAcount < totalTimes) // if there is still available time in that date
-            Halls.add("Hall A");
-        if (hallBcount < totalTimes)
-            Halls.add("Hall B");
-        if (hallCcount < totalTimes)
-            Halls.add("Hall C");
-        return Halls;      
-}
-    
-static ArrayList<String> AvailableTimes (String date, String sport,String hall){
-    ArrayList<String> TimeBooked = new ArrayList<>();
-    for (int i= 0; i < bookedDate.size(); i++){
-        if (bookedDate.get(i).equals(date)
-                && bookedSport.get(i).equals(sport)
-                && bookedHall.get(i).equals(hall)){
-            TimeBooked.add(bookedTime.get(i));  
-        }
-    }
-  
-    ArrayList<String> TimesAvailable = new ArrayList<>();
-    for (int i= 0; i< Times.length; i++){
-        String time = Times[i];
-        if (!TimeBooked.contains(time))
-                TimesAvailable.add(time);
+        return bookedFields >= fieldsCount;
         
     }
-    return TimesAvailable;
-}
-}
-    
+    }
 
