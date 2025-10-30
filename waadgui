@@ -1,0 +1,329 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package project_n;
+
+/**
+ *
+ * @author memem
+ */
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.util.Scanner;
+
+public class ClientCLI {
+    private static final String SERVER_IP = "localhost";
+    private static final int SERVER_PORT = 9090;
+
+    // ---------- GUI fields ----------
+    private JFrame frame;
+    private JTextField tfUser;
+    private JPasswordField pfPass;
+    private JButton btnRegister;
+    private JButton btnLogin;
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new ClientCLI().launchUI());
+    }
+
+    // =========================
+    //         GUI
+    // =========================
+    private void launchUI() {
+        frame = new JFrame("Sportifiy Hub – Registration / Login");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setMinimumSize(new Dimension(450, 280));
+        frame.setLocationByPlatform(true);
+
+        JPanel root = new JPanel(new BorderLayout(16, 16));
+        root.setBorder(BorderFactory.createEmptyBorder(16, 16, 16, 16));
+
+        JLabel title = new JLabel("Welcome to Sportifiy Hub");
+        title.setFont(title.getFont().deriveFont(Font.BOLD, 20f));
+        root.add(title, BorderLayout.NORTH);
+
+        JPanel form = new JPanel(new GridBagLayout());
+        GridBagConstraints gc = new GridBagConstraints();
+        gc.insets = new Insets(8, 8, 8, 8);
+        gc.fill = GridBagConstraints.HORIZONTAL;
+        gc.anchor = GridBagConstraints.WEST;
+
+        tfUser = new JTextField(20);
+        pfPass = new JPasswordField(20);
+
+        gc.gridx = 0; gc.gridy = 0; form.add(new JLabel("Username"), gc);
+        gc.gridx = 1; gc.gridy = 0; form.add(tfUser, gc);
+        gc.gridx = 0; gc.gridy = 1; form.add(new JLabel("Password"), gc);
+        gc.gridx = 1; gc.gridy = 1; form.add(pfPass, gc);
+
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        btnRegister = new JButton("Register");
+        btnLogin = new JButton("Login");
+        buttons.add(btnRegister);
+        buttons.add(btnLogin);
+
+        gc.gridx = 1; gc.gridy = 2; form.add(buttons, gc);
+
+        root.add(form, BorderLayout.CENTER);
+
+        btnRegister.addActionListener(this::onRegister);
+        btnLogin.addActionListener(this::onLogin);
+
+        frame.setContentPane(root);
+        frame.pack();
+        frame.setVisible(true);
+    }
+
+    private void onRegister(ActionEvent e) {
+        String u = tfUser.getText().trim();
+        String p = new String(pfPass.getPassword());
+        if (u.isEmpty() || p.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Please enter both username and password.", "Missing Fields", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            String resp = auth(u, p, true);
+            if (resp != null && resp.toLowerCase().contains("successful")) {
+                JOptionPane.showMessageDialog(frame, "Registration successful!", "Sportifiy Hub", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(frame, (resp == null ? "No response from server." : resp), "Registration", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(frame, "Connection error: " + ex.getMessage(), "Registration", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void onLogin(ActionEvent e) {
+        String u = tfUser.getText().trim();
+        String p = new String(pfPass.getPassword());
+        if (u.isEmpty() || p.isEmpty()) {
+            JOptionPane.showMessageDialog(frame, "Please enter both username and password.", "Missing Fields", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        try {
+            String resp = auth(u, p, false);
+            if (resp != null && resp.toLowerCase().contains("logged in successfully")) {
+                JOptionPane.showMessageDialog(frame, "Login successful!", "Sportifiy Hub", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(frame, (resp == null ? "No response from server." : resp), "Login", JOptionPane.WARNING_MESSAGE);
+            }
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(frame, "Connection error: " + ex.getMessage(), "Login", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * Send 3 lines:
+     *   username
+     *   password
+     *   "new" (registration) or "exist" (login)
+     * Returns the first response line from server (or null).
+     */
+    private String auth(String username, String password, boolean isRegistration) throws IOException {
+        try (Socket socket = new Socket(SERVER_IP, SERVER_PORT);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+            out.println(username);
+            out.println(password);
+            out.println(isRegistration ? "new" : "exist");
+
+            return in.readLine(); // adapt if your server sends multiple lines
+        }
+    }
+
+    // ====== CLI kept below if you still want it later ======
+    private void runCLI() throws IOException {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("=== SportifyHub Client ===");
+        System.out.println("1) Register new account");
+        System.out.println("2) Login to existing account");
+        System.out.print("Choose: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // consume newline
+
+        if (choice == 1) {
+            registerUser(scanner);
+        } else if (choice == 2) {
+            loginUser(scanner);
+        } else {
+            System.out.println("Invalid choice.");
+        }
+
+        scanner.close();
+    }
+
+    private static void registerUser(Scanner scanner) {
+        try (Socket socket = new Socket(SERVER_IP, SERVER_PORT);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+            System.out.print("Enter username: ");
+            String username = scanner.nextLine();
+            System.out.print("Enter password: ");
+            String password = scanner.nextLine();
+
+            out.println(username);
+            out.println(password);
+            out.println("new");
+
+            String response = in.readLine();
+            System.out.println("Server: " + response);
+
+            if (response != null && response.contains("successful")) {
+                showReservationMenu(scanner, username);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Connection error: " + e.getMessage());
+        }
+    }
+
+    private static void loginUser(Scanner scanner) {
+        try (Socket socket = new Socket(SERVER_IP, SERVER_PORT);
+             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+             PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+            System.out.print("Enter username: ");
+            String username = scanner.nextLine();
+            System.out.print("Enter password: ");
+            String password = scanner.nextLine();
+
+            out.println(username);
+            out.println(password);
+            out.println("exist");
+
+            String response = in.readLine();
+            System.out.println("Server: " + response);
+
+            if (response != null && response.contains("logged in successfully")) {
+                showReservationMenu(scanner, username);
+            }
+
+        } catch (IOException e) {
+            System.out.println("Connection error: " + e.getMessage());
+        }
+    }
+
+    private static void showReservationMenu(Scanner scanner, String username) {
+        while (true) {
+            System.out.println("\n=== Welcome " + username + " ===");
+            System.out.println("1) Make reservation");
+            System.out.println("2) View my bookings");
+            System.out.println("3) Logout");
+            System.out.print("Choose: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            switch (choice) {
+                case 1:
+                    makeReservationCLI(scanner, username);
+                    break;
+                case 2:
+                    viewBookingsCLI(username);
+                    break;
+                case 3:
+                    System.out.println("Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid choice.");
+            }
+        }
+    }
+
+    private static void makeReservationCLI(Scanner scanner, String username) {
+        System.out.println("\n=== Make Reservation ===");
+        java.util.ArrayList<String> dates = AddNewReservations.availableDates();
+        if (dates.isEmpty()) {
+            System.out.println("No available dates.");
+            return;
+        }
+        for (int i = 0; i < dates.size(); i++) {
+            System.out.println((i + 1) + ") " + AddNewReservations.formatDate(dates.get(i)));
+        }
+        System.out.print("Choose date: ");
+        int dateChoice = scanner.nextInt();
+        if (dateChoice < 1 || dateChoice > dates.size()) return;
+        String date = dates.get(dateChoice - 1);
+
+        java.util.ArrayList<String> sports = AddNewReservations.availableSports(date);
+        for (int i = 0; i < sports.size(); i++) {
+            System.out.println((i + 1) + ") " + sports.get(i));
+        }
+        System.out.print("Choose sport: ");
+        int sportChoice = scanner.nextInt();
+        if (sportChoice < 1 || sportChoice > sports.size()) return;
+        String sport = sports.get(sportChoice - 1);
+
+        java.util.ArrayList<String> times = AddNewReservations.availableTimes(date, sport);
+        for (int i = 0; i < times.size(); i++) {
+            System.out.println((i + 1) + ") " + times.get(i));
+        }
+        System.out.print("Choose time: ");
+        int timeChoice = scanner.nextInt();
+        if (timeChoice < 1 || timeChoice > times.size()) return;
+        String time = times.get(timeChoice - 1);
+
+        java.util.ArrayList<String> fields = new java.util.ArrayList<>();
+        for (int i = 1; i < AddNewReservations.FIELDS.length; i++) {
+            String field = AddNewReservations.FIELDS[i];
+            if (!AddNewReservations.isBooked(date, sport, field, time)) {
+                fields.add(field);
+            }
+        }
+        if (fields.isEmpty()) {
+            System.out.println("No available fields for this time slot.");
+            return;
+        }
+        for (int i = 0; i < fields.size(); i++) {
+            System.out.println((i + 1) + ") " + fields.get(i));
+        }
+        System.out.print("Choose field: ");
+        int fieldChoice = scanner.nextInt();
+        if (fieldChoice < 1 || fieldChoice > fields.size()) return;
+        String field = fields.get(fieldChoice - 1);
+
+        System.out.println("\n=== Confirm Reservation ===");
+        System.out.println("Date: " + date + " (" + AddNewReservations.formatDate(date) + ")");
+        System.out.println("Sport: " + sport);
+        System.out.println("Time: " + time);
+        System.out.println("Field: " + field);
+        System.out.print("Confirm? (y/n): ");
+        String confirm = scanner.next();
+        if (confirm.equalsIgnoreCase("y")) {
+            AddNewReservations.bookedDate.add(date);
+            AddNewReservations.bookedSport.add(sport);
+            AddNewReservations.bookedField.add(field);
+            AddNewReservations.bookedTime.add(time);
+            AddNewReservations.usernames.add(username);
+            AddNewReservations.passwords.add("");
+            AddNewReservations.reservedSlots.add(date + " | " + sport + " | " + field + " | " + time);
+            System.out.println("Reservation confirmed successfully!");
+        } else {
+            System.out.println("Reservation cancelled.");
+        }
+    }
+
+    private static void viewBookingsCLI(String username) {
+        System.out.println("\n=== My Bookings ===");
+        boolean found = false;
+        for (int i = 0; i < AddNewReservations.usernames.size(); i++) {
+            if (AddNewReservations.usernames.get(i).equals(username)) {
+                System.out.println((i + 1) + ") " + AddNewReservations.reservedSlots.get(i));
+                found = true;
+            }
+        }
+        if (!found) {
+            System.out.println("No bookings found.");
+        }
+    }
+}
