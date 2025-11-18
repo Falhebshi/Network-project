@@ -1,0 +1,64 @@
+public class ReservationSystem {
+
+    // ====== Slot (الملعب / الوقت) ======
+    class Slot {
+        int id;
+        String day;
+        String time;
+        boolean available = true;   // متاح افتراضياً
+
+        Slot(int id, String day, String time) {
+            this.id = id;
+            this.day = day;
+            this.time = time;
+        }
+
+        @Override
+        public String toString() {
+            return "Slot #" + id + " | " + day + " " + time + " | available=" + available;
+        }
+    }
+
+    // ====== Reservation (الحجز) ======
+    class Reservation {
+        int id;
+        Slot slot;
+        boolean cancelled = false;
+
+        Reservation(int id, Slot slot) {
+            this.id = id;
+            this.slot = slot;
+        }
+
+        @Override
+        public String toString() {
+            return "Reservation #" + id +
+                    " | " + slot +
+                    " | cancelled=" + cancelled;
+        }
+    }
+
+    // ====== Lists ======
+    java.util.ArrayList<Slot> slots = new java.util.ArrayList<>();
+    java.util.ArrayList<Reservation> reservations = new java.util.ArrayList<>();
+
+
+    // ====== (7) Confirm Cancellation ======
+    // وبعدها نستدعي وظيفة 8 مباشرة
+    public boolean confirmCancellation(int reservationId) {
+        for (Reservation r : reservations) {
+            if (r.id == reservationId) {
+                r.cancelled = true;     // تم إلغاء الحجز
+                updateAvailabilityAfterCancel(r);  // ← وظيفة رقم 8
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // ====== (8) Update Availability After Cancel ======
+    private void updateAvailabilityAfterCancel(Reservation r) {
+        r.slot.available = true;   // يرجع متاح للناس
+    }
+
+}
